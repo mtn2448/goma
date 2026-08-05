@@ -1036,6 +1036,74 @@
         }
 
         /* ============================================================
+           CRACKER / FIREWORKS OVERLAY
+        ============================================================ */
+        .fireworks-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .cracker-particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: crackerExplode var(--duration) ease-out forwards;
+        }
+
+        @keyframes crackerExplode {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot));
+                opacity: 0;
+            }
+        }
+
+        .cracker-star {
+            position: absolute;
+            font-size: 2rem;
+            animation: starExplode var(--duration) ease-out forwards;
+        }
+
+        @keyframes starExplode {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot));
+                opacity: 0;
+            }
+        }
+
+        .cracker-line {
+            position: absolute;
+            height: 3px;
+            border-radius: 2px;
+            animation: lineExplode var(--duration) ease-out forwards;
+        }
+
+        @keyframes lineExplode {
+            0% {
+                transform: translate(0, 0) scaleX(0) rotate(var(--rot));
+                opacity: 1;
+                width: 0;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scaleX(1) rotate(var(--rot));
+                opacity: 0;
+                width: var(--line-length);
+            }
+        }
+
+        /* ============================================================
            RESPONSIVE
         ============================================================ */
         @media (max-width: 650px) {
@@ -1309,6 +1377,11 @@
     <div class="sparkles" id="sparkles"></div>
 
     <!-- ============================================================
+    FIREWORKS OVERLAY
+    ============================================================ -->
+    <div class="fireworks-overlay" id="fireworksOverlay"></div>
+
+    <!-- ============================================================
     MAIN CARD
     ============================================================ -->
     <div class="card">
@@ -1425,20 +1498,168 @@
         createSparkles();
 
         // ============================================================
+        // FIREWORKS / CRACKER ANIMATION
+        // ============================================================
+        function createFireworks() {
+            const overlay = document.getElementById('fireworksOverlay');
+            const colors = [
+                '#ff6b8a', '#ff4d7a', '#ff3366', '#ff8fab',
+                '#ffd700', '#ffaa00', '#ffcc44', '#ffe066',
+                '#ff6b6b', '#ff4757', '#ff3838', '#ff6348',
+                '#7bed9f', '#2ed573', '#26de81', '#4cd137',
+                '#70a1ff', '#1e90ff', '#3742fa', '#5f27cd',
+                '#ff9ff3', '#f368e0', '#e056a0', '#be2edd',
+                '#00d2d3', '#01a3a4', '#00b894', '#00cec9'
+            ];
+
+            const emojis = ['❤️', '💖', '💕', '💗', '💓', '💘', '💝', '✨', '🌟', '🎉', '🎊', '🌸', '🌺', '🪷', '💐', '🌷', '🌹'];
+
+            // Create multiple bursts
+            const burstCount = 6 + Math.floor(Math.random() * 4);
+
+            for (let b = 0; b < burstCount; b++) {
+                const cx = 10 + Math.random() * 80;
+                const cy = 10 + Math.random() * 80;
+                const count = 30 + Math.random() * 40;
+                const delay = b * 200 + Math.random() * 300;
+
+                setTimeout(() => {
+                    // Particle burst
+                    for (let i = 0; i < count; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = 150 + Math.random() * 350;
+                        const tx = Math.cos(angle) * distance;
+                        const ty = Math.sin(angle) * distance - 100;
+                        const rot = (Math.random() - 0.5) * 720;
+                        const duration = 1.5 + Math.random() * 1.5;
+                        const size = 4 + Math.random() * 10;
+
+                        const el = document.createElement('div');
+                        el.className = 'cracker-particle';
+                        el.style.left = cx + '%';
+                        el.style.top = cy + '%';
+                        el.style.width = size + 'px';
+                        el.style.height = size + 'px';
+                        el.style.setProperty('--tx', tx + 'px');
+                        el.style.setProperty('--ty', ty + 'px');
+                        el.style.setProperty('--rot', rot + 'deg');
+                        el.style.setProperty('--duration', duration + 's');
+                        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        el.style.boxShadow = `0 0 ${size * 2}px ${colors[Math.floor(Math.random() * colors.length)]}`;
+                        el.style.borderRadius = Math.random() > 0.3 ? '50%' : '2px';
+                        overlay.appendChild(el);
+
+                        setTimeout(() => el.remove(), duration * 1000 + 100);
+                    }
+
+                    // Star burst
+                    const starCount = 5 + Math.floor(Math.random() * 8);
+                    for (let i = 0; i < starCount; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = 100 + Math.random() * 250;
+                        const tx = Math.cos(angle) * distance;
+                        const ty = Math.sin(angle) * distance - 80;
+                        const rot = (Math.random() - 0.5) * 720;
+                        const duration = 1.8 + Math.random() * 1.2;
+
+                        const el = document.createElement('div');
+                        el.className = 'cracker-star';
+                        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                        el.style.left = cx + '%';
+                        el.style.top = cy + '%';
+                        el.style.fontSize = (1.2 + Math.random() * 2) + 'rem';
+                        el.style.setProperty('--tx', tx + 'px');
+                        el.style.setProperty('--ty', ty + 'px');
+                        el.style.setProperty('--rot', rot + 'deg');
+                        el.style.setProperty('--duration', duration + 's');
+                        overlay.appendChild(el);
+
+                        setTimeout(() => el.remove(), duration * 1000 + 100);
+                    }
+
+                    // Line burst (like sparkler trails)
+                    const lineCount = 8 + Math.floor(Math.random() * 12);
+                    for (let i = 0; i < lineCount; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = 100 + Math.random() * 200;
+                        const tx = Math.cos(angle) * distance;
+                        const ty = Math.sin(angle) * distance - 60;
+                        const rot = angle * (180 / Math.PI);
+                        const duration = 0.8 + Math.random() * 0.8;
+                        const length = 30 + Math.random() * 60;
+
+                        const el = document.createElement('div');
+                        el.className = 'cracker-line';
+                        el.style.left = cx + '%';
+                        el.style.top = cy + '%';
+                        el.style.setProperty('--tx', tx + 'px');
+                        el.style.setProperty('--ty', ty + 'px');
+                        el.style.setProperty('--rot', rot + 'deg');
+                        el.style.setProperty('--duration', duration + 's');
+                        el.style.setProperty('--line-length', length + 'px');
+                        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        el.style.boxShadow = `0 0 10px ${colors[Math.floor(Math.random() * colors.length)]}`;
+                        overlay.appendChild(el);
+
+                        setTimeout(() => el.remove(), duration * 1000 + 100);
+                    }
+
+                    // Glow burst - big soft circles
+                    const glowCount = 3 + Math.floor(Math.random() * 5);
+                    for (let i = 0; i < glowCount; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = 80 + Math.random() * 150;
+                        const tx = Math.cos(angle) * distance;
+                        const ty = Math.sin(angle) * distance - 50;
+                        const duration = 1.2 + Math.random() * 0.8;
+                        const size = 20 + Math.random() * 40;
+
+                        const el = document.createElement('div');
+                        el.className = 'cracker-particle';
+                        el.style.left = cx + '%';
+                        el.style.top = cy + '%';
+                        el.style.width = size + 'px';
+                        el.style.height = size + 'px';
+                        el.style.setProperty('--tx', tx + 'px');
+                        el.style.setProperty('--ty', ty + 'px');
+                        el.style.setProperty('--rot', '0deg');
+                        el.style.setProperty('--duration', duration + 's');
+                        el.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]}, transparent)`;
+                        el.style.boxShadow = 'none';
+                        el.style.opacity = '0.4';
+                        el.style.borderRadius = '50%';
+                        overlay.appendChild(el);
+
+                        setTimeout(() => el.remove(), duration * 1000 + 100);
+                    }
+                }, delay);
+            }
+
+            // After all bursts, clean up any stragglers
+            setTimeout(() => {
+                overlay.innerHTML = '';
+            }, 5000);
+        }
+
+        // ============================================================
         // PROPOSAL FUNCTION
         // ============================================================
         function propose() {
+            // Show the alert
             alert('💖 Yes! Goma said YES! 💖\n\n— Himal will love you forever and always! 🪷❤️');
 
-            // Celebration burst
-            const emojis = ['❤️', '💖', '💕', '💗', '💓', '💘', '🌸', '✨', '🌟', '🎉', '💝', '🪷', '🌺', '💐', '🎊', '🌷'];
-            for (let i = 0; i < 80; i++) {
+            // Trigger the cracker/fireworks animation
+            createFireworks();
+
+            // Also trigger the emoji burst from before (complementary)
+            const emojis = ['❤️', '💖', '💕', '💗', '💓', '💘', '🌸', '✨', '🌟', '🎉', '💝', '🪷', '🌺', '💐', '🎊', '🌷', '🌹'];
+            for (let i = 0; i < 60; i++) {
                 setTimeout(() => {
                     const el = document.createElement('div');
                     el.style.position = 'fixed';
                     el.style.pointerEvents = 'none';
-                    el.style.zIndex = '9999';
-                    el.style.fontSize = (1.5 + Math.random() * 4.5) + 'rem';
+                    el.style.zIndex = '9998';
+                    el.style.fontSize = (1.5 + Math.random() * 4) + 'rem';
                     el.style.left = (10 + Math.random() * 80) + '%';
                     el.style.top = (10 + Math.random() * 80) + '%';
                     el.style.transition = 'all 3.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
@@ -1456,8 +1677,8 @@
                         el.style.opacity = '0';
                     }, 50);
 
-                    setTimeout(() => el.remove(), 3500);
-                }, i * 35);
+                    setTimeout(() => el.remove(), 3800);
+                }, i * 30);
             }
         }
     </script>
